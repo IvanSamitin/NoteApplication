@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainNotes">
+
+    <fragment
+        android:id="@+id/mainNotes"
+        android:name="com.example.noteapplication8.ui.fragments.MainNotes"
+        android:label="fragment_main_notes"
+        tools:layout="@layout/fragment_main_notes" >
+        <action
+            android:id="@+id/action_mainNotes_to_tagEditFragment2"
+            app:destination="@id/tagEditFragment2"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_mainNotes_to_noteEditFragment"
+            app:destination="@id/noteEditFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/tagEditFragment2"
+        android:name="com.example.noteapplication8.ui.fragments.TagEditFragment"
+        android:label="fragment_tag_edit"
+        tools:layout="@layout/fragment_tag_edit" >
+        <action
+            android:id="@+id/action_tagEditFragment2_to_noteEditFragment"
+            app:destination="@id/noteEditFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/noteEditFragment"
+        android:name="com.example.noteapplication8.ui.fragments.NoteEditFragment"
+        android:label="fragment_note_edit"
+        tools:layout="@layout/fragment_note_edit" />
+</navigation>

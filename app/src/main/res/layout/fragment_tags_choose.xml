@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    style="@style/Widget.AppCompat.ButtonBar.AlertDialog"
+    android:padding="16dp">
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:chipSpacing="4dp"
+        app:chipSpacingVertical="4dp"
+        app:selectionRequired="false"
+        app:singleSelection="false">
+
+        <!--        &lt;!&ndash; Статический пример &ndash;&gt;-->
+        <!--        <com.google.android.material.chip.Chip-->
+        <!--            style="@style/Widget.Material3.Chip.Filter"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="Work"-->
+        <!--            app:checkedIconVisible="true"-->
+        <!--            app:chipIcon="@drawable/ic_check"-->
+        <!--             />-->
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <Button
+        android:id="@+id/btnApply"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:text="Apply" />
+
+</LinearLayout>
