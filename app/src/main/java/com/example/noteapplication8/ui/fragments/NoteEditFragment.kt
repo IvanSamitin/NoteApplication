@@ -1,5 +1,7 @@
 package com.example.noteapplication8.ui.fragments
 
+import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -13,12 +15,16 @@ import com.example.noteapplication8.model.entity.NoteWithTags
 import com.example.noteapplication8.model.entity.TagsEntity
 import com.example.noteapplication8.viewmodel.NotesViewModel
 import com.example.noteapplication8.viewmodel.NotesViewModelFactory
+import com.google.android.material.datepicker.MaterialDatePicker
+import java.util.Locale
 
 class NoteEditFragment : Fragment() {
     private var _binding: FragmentNoteEditBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: NotesViewModel
     private lateinit var tags: LongArray
+    private val selectedDate = Calendar.getInstance()
+    private var currentSelectedTagIds = mutableSetOf<Long>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,6 +43,10 @@ class NoteEditFragment : Fragment() {
             this,
             NotesViewModelFactory(requireActivity().application)
         )[NotesViewModel::class.java]
+
+        arguments?.getParcelable<NoteWithTags>("note")?.tags?.let { tags ->
+            currentSelectedTagIds.addAll(tags.map { it.tagId })
+        }
 
         val receivedNote = arguments?.getParcelable<NoteWithTags>("note")
 
@@ -63,8 +73,9 @@ class NoteEditFragment : Fragment() {
         }
 
         binding.buttonTags.setOnClickListener {
-//            val someData: List<TagsEntity> = listOf(TagsEntity(text = "daw"))
-            val dialog = TagsChooseFragment.newInstance(null)
+            val dialog = TagsChooseFragment.newInstance(
+                currentSelectedTagIds.map { TagsEntity(it, "") }
+            )
             dialog.show(parentFragmentManager, "tagsDialog")
         }
 
@@ -73,16 +84,40 @@ class NoteEditFragment : Fragment() {
 
             updateNoteTags(tags)
         }
+
+        binding.tvDate.setOnClickListener {
+            showMaterialDatePicker()
+        }
     }
 
-    private fun updateNoteTags(longs: LongArray?) {
-        if(longs?.isNotEmpty() == true){
-            binding.containerTags.setVisibility(View.VISIBLE)
-            var idString: String = "Теги: "
-            longs.forEach {
-                idString+="${it} "
+    private fun showMaterialDatePicker() {
+        val picker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText("Выберите дату")
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .build()
+        picker.addOnPositiveButtonClickListener { selection ->
+            selection?.let {
+                selectedDate.timeInMillis = it
+                updateDateLabel()
             }
-            binding.tvAllTags.setText(idString.toString())
+        }
+        picker.show(requireActivity().supportFragmentManager, "DATE_PICKER")
+    }
+
+    private fun updateDateLabel() {
+        val dateFormat = "dd/MM/yyyy"
+        val sdf = SimpleDateFormat(dateFormat, Locale.getDefault())
+        binding.tvDate.setText(sdf.format(selectedDate.time))
+    }
+
+
+    private fun updateNoteTags(tagIds: LongArray?) {
+        viewModel.getTagsByIds(tagIds).observe(viewLifecycleOwner) { tags ->
+            if (tags.isNotEmpty()) {
+                binding.containerTags.visibility = View.VISIBLE
+                val tagsText = tags.joinToString(", ") { it.text }
+                binding.tvAllTags.setText(tagsText.toString())
+            }
         }
     }
 

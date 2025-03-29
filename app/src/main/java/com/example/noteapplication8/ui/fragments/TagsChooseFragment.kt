@@ -21,6 +21,7 @@ class TagsChooseFragment : BottomSheetDialogFragment() {
     private lateinit var viewModel: NotesViewModel
     private val selectedTags = mutableSetOf<Long>()
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,8 +36,6 @@ class TagsChooseFragment : BottomSheetDialogFragment() {
             NotesViewModelFactory(requireActivity().application)
         )[NotesViewModel::class.java]
 
-//        val myDataList: ArrayList<TagsEntity>? = arguments?.getParcelableArrayList(ARG_SOME_DATA)
-
         viewModel.readAllTags().observe(viewLifecycleOwner) { tags ->
             updateChipGroup(tags)
         }
@@ -44,6 +43,9 @@ class TagsChooseFragment : BottomSheetDialogFragment() {
     }
 
     private fun updateChipGroup(tags: List<TagsEntity>) {
+        val initialSelectedIds = arguments?.getLongArray(ARG_SELECTED_TAG_IDS)?.toSet() ?: emptySet()
+        selectedTags.addAll(initialSelectedIds)
+
         val chipGroup = view?.findViewById<ChipGroup>(R.id.chipGroup)
         chipGroup?.removeAllViews()
 
@@ -58,6 +60,7 @@ class TagsChooseFragment : BottomSheetDialogFragment() {
             text = tag.text
             isCheckable = true
             isCheckedIconVisible = true
+            isChecked = selectedTags.contains(tag.tagId)
 
             setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
@@ -78,15 +81,17 @@ class TagsChooseFragment : BottomSheetDialogFragment() {
     }
 
     companion object {
-        private const val ARG_SOME_DATA = "argSomeData"
+        private const val ARG_SELECTED_TAG_IDS = "argSelectedTagIds"
 
-        fun newInstance(someData: List<TagsEntity>?): TagsChooseFragment {
-            val fragment = TagsChooseFragment()
-            val args = Bundle().apply {
-                putParcelable(ARG_SOME_DATA, someData as Parcelable?)
+        fun newInstance(selectedTags: List<TagsEntity>?): TagsChooseFragment {
+            return TagsChooseFragment().apply {
+                arguments = Bundle().apply {
+                    putLongArray(
+                        ARG_SELECTED_TAG_IDS,
+                        selectedTags?.map { it.tagId }?.toLongArray()
+                    )
+                }
             }
-            fragment.arguments = args
-            return fragment
         }
     }
 }

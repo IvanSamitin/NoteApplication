@@ -17,8 +17,17 @@ class RcNoteAdapter(private val onItemClick: (NoteWithTags) -> Unit): ListAdapte
         val binding = NoteListBinding.bind(item)
         fun bind(note: NoteWithTags) = with(binding){
             tvDate.text = note.note.date.toString()
-            tvHeader.text = note.note.header.toString()
-            tvText.text = note.note.text.toString()
+
+            if (note.note.header.toString().length >= 60){
+                val headerType = "${note.note.header.toString().take(60)}..."
+                tvHeader.text = headerType
+            } else tvHeader.text = note.note.header.toString()
+
+            if (note.note.text.toString().length >= 60){
+                val textType = "${note.note.text.toString().take(60)}..."
+                tvText.text = textType
+            } else tvText.text = note.note.text.toString()
+
             if (note.tags.isNullOrEmpty()) tvTagsList.text = "Нету тегов"
             else{
                 val tagsText = note.tags.joinToString(", ") { it.text }

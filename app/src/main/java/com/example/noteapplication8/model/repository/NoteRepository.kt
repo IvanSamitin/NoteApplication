@@ -6,7 +6,6 @@ import com.example.noteapplication8.model.dao.NoteWithTagsDao
 import com.example.noteapplication8.model.dao.TagDao
 import com.example.noteapplication8.model.entity.NoteEntity
 import com.example.noteapplication8.model.entity.NoteWithTags
-import com.example.noteapplication8.model.entity.NoteWithTagsEntity
 import com.example.noteapplication8.model.entity.TagsEntity
 
 class NoteRepository(
@@ -14,6 +13,17 @@ class NoteRepository(
     private val tagDao: TagDao,
     private val relationDao: NoteWithTagsDao
 ) {
+    val readAllTags: LiveData<List<TagsEntity>>
+        get() = tagDao.getAllTags()
+
+    val readAllNotesWithTag: LiveData<List<NoteWithTags>>
+        get() = relationDao.getAllNotesWithTags()
+
+
+
+    suspend fun createNoteWithTags(note: NoteEntity, tagIds: LongArray) = relationDao.createNoteWithTags(note, tagIds)
+
+    suspend fun updateNoteWithTags(note: NoteEntity, tagIds: LongArray) = relationDao.updateNoteWithTags(note, tagIds)
 
     suspend fun createNoteWithoutTag(note: NoteEntity) = noteDao.insertNote(note)
 
@@ -23,53 +33,11 @@ class NoteRepository(
 
     suspend fun deleteTag(tag: TagsEntity) = tagDao.deleteTag(tag)
 
-    val readAllNotes: LiveData<List<NoteEntity>>
-        get() = noteDao.getAllNotes()
-
-    val readAllTags: LiveData<List<TagsEntity>>
-        get() = tagDao.getAllTags()
+    fun getNotesByTagId(tagId: Long) = relationDao.getNotesByTagId(tagId)
 
     suspend fun updateNote(note: NoteEntity) = noteDao.updateNote(note)
 
     suspend fun updateTag(tag: TagsEntity) = tagDao.updateTag(tag)
 
-//    suspend fun getAllNotesWithTags() = relationDao.getAllNotesWithTags()
-//
-//    // Создать заметку с существующим тегом
-//    suspend fun createNoteWithExistingTag(note: NoteEntity, tagId: Long): Long {
-//        val noteId = noteDao.insertNote(note)
-//        relationDao.addTagToNote(NoteWithTagsEntity(noteId, tagId))
-//        return noteId
-//    }
-//
-//    // Создать заметку с новым тегом
-//    suspend fun createNoteWithNewTag(note: NoteEntity, tagText: String): Long {
-//        val tagId = tagDao.insertTag(TagsEntity(text = tagText))
-//        return createNoteWithExistingTag(note, tagId)
-//    }
-//
-//    // Удалить заметку (без удаления тегов)
-//    suspend fun deleteNoteKeepingTags(note: NoteEntity) {
-//        noteDao.deleteNote(note)
-//        relationDao.removeAllTagsFromNote(note.noteId)
-//    }
-//
-//    // Удалить заметку и связанные теги (если они больше не используются)
-//    suspend fun deleteNoteWithOrphanedTags(note: NoteEntity) {
-//        val relations = relationDao.getTagsForNote(note.noteId)
-//        noteDao.deleteNote(note)
-//
-//        relations.forEach { relation ->
-//            if(tagDao.getNoteCountForTag(relation.tagId) == 0) {
-//                tagDao.deleteTagById(relation.tagId)
-//            }
-//        }
-//    }
-//
-//
-//
-//    // Удалить тег со всеми связанными заметками
-//    suspend fun deleteTagWithAllNotes(tagId: Long) {
-//        tagDao.deleteTagWithNotes(tagId)
-//    }
+    fun getTagsByIds(ids: LongArray?) = tagDao.getTagsByIds(ids)
 }

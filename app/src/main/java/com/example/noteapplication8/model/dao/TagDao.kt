@@ -7,8 +7,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.example.noteapplication8.model.entity.NoteEntity
-import com.example.noteapplication8.model.entity.TagWithNotes
 import com.example.noteapplication8.model.entity.TagsEntity
 
 @Dao
@@ -48,4 +46,7 @@ interface TagDao {
 
     @Query("DELETE FROM tags WHERE tagId = :tagId")
     suspend fun deleteTagById(tagId: Long)
+
+    @Query("SELECT * FROM tags WHERE tagId IN (:ids)")
+    fun getTagsByIds(ids: LongArray?): LiveData<List<TagsEntity>>
 }

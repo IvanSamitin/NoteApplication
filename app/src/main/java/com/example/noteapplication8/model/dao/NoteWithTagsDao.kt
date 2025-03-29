@@ -82,13 +82,4 @@ interface NoteWithTagsDao {
         }
     }
 
-//
-//    @Delete
-//    suspend fun removeTagFromNote(relation: NoteWithTagsEntity)
-//
-//    @Query("DELETE FROM note_with_tag WHERE noteId = :noteId")
-//    suspend fun removeAllTagsFromNote(noteId: Long)
-//
-//    @Query("SELECT * FROM note_with_tag WHERE noteId = :noteId")
-//    suspend fun getTagsForNote(noteId: Long): List<NoteWithTagsEntity>
 }
