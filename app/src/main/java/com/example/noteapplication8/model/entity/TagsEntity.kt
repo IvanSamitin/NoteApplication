@@ -9,5 +9,5 @@ import kotlinx.parcelize.Parcelize
 @Entity(tableName = "tags")
 data class TagsEntity(
     @PrimaryKey(autoGenerate = true) val tagId: Long = 0,
-    val text: String
-): Parcelable
+    val text: String,
+) : Parcelable

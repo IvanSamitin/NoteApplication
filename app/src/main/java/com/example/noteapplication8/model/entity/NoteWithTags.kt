@@ -12,7 +12,7 @@ data class NoteWithTags(
     @Relation(
         parentColumn = "noteId",
         entityColumn = "tagId",
-        associateBy = Junction(NoteWithTagsEntity::class)
+        associateBy = Junction(NoteWithTagsEntity::class),
     )
-    val tags: List<TagsEntity>
-): Parcelable
+    val tags: List<TagsEntity>,
+) : Parcelable

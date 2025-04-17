@@ -24,7 +24,6 @@ interface TagDao {
     @Query("SELECT * FROM tags")
     fun getAllTags(): LiveData<List<TagsEntity>>
 
-
     // Проверка наличия заметок у тега
     @Query("SELECT COUNT(*) FROM note_with_tag WHERE tagId = :tagId")
     suspend fun getNoteCountForTag(tagId: Long): Int

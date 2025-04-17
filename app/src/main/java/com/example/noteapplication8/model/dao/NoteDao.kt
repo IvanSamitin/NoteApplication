@@ -32,12 +32,14 @@ interface NoteDao {
 
     // Поиск по тегам
     @Transaction
-    @Query("""
+    @Query(
+        """
         SELECT * FROM notes 
         WHERE noteId IN (
             SELECT noteId FROM note_with_tag 
             WHERE tagId = :tagId
         )
-    """)
+    """
+    )
     suspend fun getNotesByTag(tagId: Long): List<NoteWithTags>
 }

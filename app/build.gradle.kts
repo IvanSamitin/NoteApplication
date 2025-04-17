@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.14")
     val room_version = "2.6.1"
     ksp("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-runtime:$room_version")

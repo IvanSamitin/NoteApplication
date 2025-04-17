@@ -2,7 +2,6 @@ package com.example.noteapplication8.model.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -14,7 +13,6 @@ import com.example.noteapplication8.model.entity.NoteWithTagsEntity
 
 @Dao
 interface NoteWithTagsDao {
-
     // Вставка заметки
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNote(note: NoteEntity): Long
@@ -24,23 +22,26 @@ interface NoteWithTagsDao {
     fun getAllNotesWithTags(): LiveData<List<NoteWithTags>>
 
     @Transaction
-    @Query("""
+    @Query(
+        """
         SELECT * FROM notes 
         WHERE noteId IN (
             SELECT noteId FROM note_with_tag 
             WHERE tagId = :tagId
         )
-    """)
+    """,
+    )
     fun getNotesByTagId(tagId: Long): LiveData<List<NoteWithTags>>
 
     @Insert
     suspend fun insertNoteWithTag(noteWithTag: NoteWithTagsEntity)
 
-
-
     // Транзакция для создания заметки с тегами
     @Transaction
-    suspend fun createNoteWithTags(note: NoteEntity, tagIds: LongArray) {
+    suspend fun createNoteWithTags(
+        note: NoteEntity,
+        tagIds: LongArray,
+    ) {
         // 1. Вставляем заметку и получаем её ID
         val noteId = insertNote(note)
 
@@ -49,8 +50,8 @@ interface NoteWithTagsDao {
             insertNoteWithTag(
                 NoteWithTagsEntity(
                     noteId = noteId,
-                    tagId = tagId
-                )
+                    tagId = tagId,
+                ),
             )
         }
     }
@@ -64,7 +65,10 @@ interface NoteWithTagsDao {
 
     // Полная транзакция для обновления заметки с тегами
     @Transaction
-    suspend fun updateNoteWithTags(note: NoteEntity, tagIds: LongArray) {
+    suspend fun updateNoteWithTags(
+        note: NoteEntity,
+        tagIds: LongArray,
+    ) {
         // 1. Обновляем саму заметку
         updateNote(note)
 
@@ -76,10 +80,9 @@ interface NoteWithTagsDao {
             insertNoteWithTag(
                 NoteWithTagsEntity(
                     noteId = note.noteId,
-                    tagId = tagId
-                )
+                    tagId = tagId,
+                ),
             )
         }
     }
-
 }

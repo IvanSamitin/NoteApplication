@@ -12,4 +12,4 @@ data class NoteEntity(
     val date: String,
     val header: String,
     val text: String,
-): Parcelable
+) : Parcelable

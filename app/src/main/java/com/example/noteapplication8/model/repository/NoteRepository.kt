@@ -11,7 +11,7 @@ import com.example.noteapplication8.model.entity.TagsEntity
 class NoteRepository(
     private val noteDao: NoteDao,
     private val tagDao: TagDao,
-    private val relationDao: NoteWithTagsDao
+    private val relationDao: NoteWithTagsDao,
 ) {
     val readAllTags: LiveData<List<TagsEntity>>
         get() = tagDao.getAllTags()
@@ -19,11 +19,15 @@ class NoteRepository(
     val readAllNotesWithTag: LiveData<List<NoteWithTags>>
         get() = relationDao.getAllNotesWithTags()
 
+    suspend fun createNoteWithTags(
+        note: NoteEntity,
+        tagIds: LongArray,
+    ) = relationDao.createNoteWithTags(note, tagIds)
 
-
-    suspend fun createNoteWithTags(note: NoteEntity, tagIds: LongArray) = relationDao.createNoteWithTags(note, tagIds)
-
-    suspend fun updateNoteWithTags(note: NoteEntity, tagIds: LongArray) = relationDao.updateNoteWithTags(note, tagIds)
+    suspend fun updateNoteWithTags(
+        note: NoteEntity,
+        tagIds: LongArray,
+    ) = relationDao.updateNoteWithTags(note, tagIds)
 
     suspend fun createNoteWithoutTag(note: NoteEntity) = noteDao.insertNote(note)
 

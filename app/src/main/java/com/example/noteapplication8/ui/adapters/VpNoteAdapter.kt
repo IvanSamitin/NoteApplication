@@ -1,15 +1,13 @@
 package com.example.noteapplication8.ui.adapters
 
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 
-class VpNoteAdapter(fa: FragmentActivity, private val list: List<Fragment>): FragmentStateAdapter(fa)  {
-    override fun getItemCount(): Int {
-        return list.size
-    }
+class VpNoteAdapter(
+    fragment: Fragment,
+    private val list: List<Fragment>,
+) : FragmentStateAdapter(fragment) {
+    override fun getItemCount(): Int = list.size
 
-    override fun createFragment(position: Int): Fragment {
-        return list[position]
-    }
+    override fun createFragment(position: Int): Fragment = list[position]
 }
