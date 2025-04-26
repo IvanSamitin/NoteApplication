@@ -15,12 +15,12 @@ import com.example.noteapplication8.model.entity.NoteWithTags
 import com.example.noteapplication8.model.entity.TagsEntity
 import com.example.noteapplication8.ui.adapters.RcNoteAdapter
 import com.example.noteapplication8.viewmodel.NotesViewModel
-import com.example.noteapplication8.viewmodel.NotesViewModelFactory
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class TagEditFragment : Fragment() {
     private var _binding: FragmentTagEditBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: NotesViewModel
+    private val viewModel by viewModel<NotesViewModel>()
     private var allNotes: List<NoteWithTags> = emptyList()
 
     override fun onCreateView(
@@ -38,11 +38,6 @@ class TagEditFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel =
-            ViewModelProvider(
-                this,
-                NotesViewModelFactory(requireActivity().application),
-            )[NotesViewModel::class.java]
 
         val adapter =
             RcNoteAdapter {
@@ -100,13 +95,7 @@ class TagEditFragment : Fragment() {
 
     private fun updateCurrentTag(id: Long) {
         binding.buttonSave.setOnClickListener {
-            viewModel.updateTag(
-                tag =
-                    TagsEntity(
-                        tagId = id,
-                        text = binding.tvTagText.text.toString(),
-                    ),
-            )
+            viewModel.updateTag(tagId = id, text = binding.tvTagText.text.toString())
             findNavController().popBackStack()
         }
         binding.buttonDelite.setOnClickListener {
@@ -123,7 +112,7 @@ class TagEditFragment : Fragment() {
 
     private fun saveNewTag() {
         binding.buttonSave.setOnClickListener {
-            viewModel.createTag(tag = TagsEntity(text = binding.tvTagText.text.toString()))
+            viewModel.createTag(text = binding.tvTagText.text.toString())
             findNavController().popBackStack()
         }
     }

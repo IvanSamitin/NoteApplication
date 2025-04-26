@@ -6,17 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.core.os.bundleOf
-import androidx.lifecycle.ViewModelProvider
 import com.example.noteapplication8.R
 import com.example.noteapplication8.model.entity.TagsEntity
 import com.example.noteapplication8.viewmodel.NotesViewModel
-import com.example.noteapplication8.viewmodel.NotesViewModelFactory
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class TagsChooseFragment : BottomSheetDialogFragment() {
-    private lateinit var viewModel: NotesViewModel
+    private val viewModel by viewModel<NotesViewModel>()
     private val selectedTags = mutableSetOf<Long>()
 
     override fun onCreateView(
@@ -30,13 +29,8 @@ class TagsChooseFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel =
-            ViewModelProvider(
-                this,
-                NotesViewModelFactory(requireActivity().application),
-            )[NotesViewModel::class.java]
 
-        viewModel.readAllTags().observe(this) { tags ->
+        viewModel.readAllTags().observe(viewLifecycleOwner) { tags ->
             updateChipGroup(tags)
         }
         setupApplyButton(view)

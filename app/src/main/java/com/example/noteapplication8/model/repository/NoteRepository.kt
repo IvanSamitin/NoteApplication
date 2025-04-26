@@ -33,7 +33,7 @@ class NoteRepository(
 
     suspend fun createTag(tag: TagsEntity) = tagDao.insertTag(tag)
 
-    suspend fun deleteNoteWithoutTag(note: NoteEntity) = noteDao.deleteNote(note)
+    suspend fun deleteNoteWithoutTag(noteId: Long) = noteDao.deleteNoteById(noteId)
 
     suspend fun deleteTag(tag: TagsEntity) = tagDao.deleteTag(tag)
 

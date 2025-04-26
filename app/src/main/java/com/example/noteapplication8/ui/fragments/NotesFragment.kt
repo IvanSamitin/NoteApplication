@@ -14,12 +14,12 @@ import com.example.noteapplication8.databinding.FragmentNotesBinding
 import com.example.noteapplication8.model.entity.NoteWithTags
 import com.example.noteapplication8.ui.adapters.RcNoteAdapter
 import com.example.noteapplication8.viewmodel.NotesViewModel
-import com.example.noteapplication8.viewmodel.NotesViewModelFactory
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class NotesFragment : Fragment() {
     private var _binding: FragmentNotesBinding? = null
     private val binding get() = _binding!!
-    private lateinit var viewModel: NotesViewModel
+    private val viewModel by viewModel<NotesViewModel>()
     private var allNotes: List<NoteWithTags> = emptyList()
 
     override fun onCreateView(
@@ -37,11 +37,6 @@ class NotesFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel =
-            ViewModelProvider(
-                this,
-                NotesViewModelFactory(requireActivity().application),
-            )[NotesViewModel::class.java]
 
         val adapter =
             RcNoteAdapter {

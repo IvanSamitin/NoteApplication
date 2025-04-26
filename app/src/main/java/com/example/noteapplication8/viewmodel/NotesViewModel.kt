@@ -1,9 +1,7 @@
 package com.example.noteapplication8.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.noteapplication8.model.datasource.NoteDatabase
 import com.example.noteapplication8.model.entity.NoteEntity
 import com.example.noteapplication8.model.entity.TagsEntity
 import com.example.noteapplication8.model.repository.NoteRepository
@@ -11,42 +9,46 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class NotesViewModel(
-    application: Application,
-) : AndroidViewModel(application) {
-    val context = application
+    private val repository: NoteRepository
+) : ViewModel() {
 
-    val noteDao = NoteDatabase.getDatabase(context = context).noteDao()
-    val noteWithTagsDao = NoteDatabase.getDatabase(context = context).noteWithTagsDao()
-    val tagDao = NoteDatabase.getDatabase(context = context).tagDao()
-    var repository = NoteRepository(noteDao, tagDao, noteWithTagsDao)
-
-    fun createNoteWithoutTag(note: NoteEntity) {
+    fun createNoteWithoutTag(date: String, header: String, text: String) {
         viewModelScope.launch(Dispatchers.IO) {
+            val note = NoteEntity(date = date, header = header, text = text)
             repository.createNoteWithoutTag(note = note)
         }
     }
 
-    fun createTag(tag: TagsEntity) {
+    fun createNoteWithTags(date: String, header: String, text: String, tagIds: LongArray) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.createTag(tag = tag)
+            val note = NoteEntity(date = date, header = header, text = text)
+            repository.createNoteWithTags(note, tagIds)
         }
     }
 
-    fun updateNote(note: NoteEntity) {
+    fun updateNoteWithoutTags(noteId: Long, date: String, header: String, text: String) {
         viewModelScope.launch(Dispatchers.IO) {
+            val note = NoteEntity(noteId = noteId, date = date, header = header, text = text)
             repository.updateNote(note = note)
         }
     }
 
-    fun updateTag(tag: TagsEntity) {
+    fun updateNoteWithTags(
+        noteId: Long,
+        date: String,
+        header: String,
+        text: String,
+        tagIds: LongArray
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.updateTag(tag = tag)
+            val note = NoteEntity(noteId = noteId, date = date, header = header, text = text)
+            repository.updateNoteWithTags(note, tagIds)
         }
     }
 
-    fun deleteNote(note: NoteEntity) {
+    fun deleteNote(noteId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteNoteWithoutTag(note = note)
+            repository.deleteNoteWithoutTag(noteId)
         }
     }
 
@@ -56,29 +58,24 @@ class NotesViewModel(
         }
     }
 
+    fun createTag(text: String) {
+        viewModelScope.launch {
+            repository.createTag(TagsEntity(text = text))
+        }
+    }
+
+    fun updateTag(tagId: Long, text: String) {
+        viewModelScope.launch {
+            repository.updateTag(TagsEntity(tagId, text))
+        }
+    }
+
     fun readAllNotesByTags(tagId: Long) = repository.getNotesByTagId(tagId)
 
     fun readAllTags() = repository.readAllTags
 
     fun readAllNotesWithTags() = repository.readAllNotesWithTag
 
-    fun createNoteWithTags(
-        note: NoteEntity,
-        tagIds: LongArray,
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.createNoteWithTags(note, tagIds)
-        }
-    }
-
-    fun updateNoteWithTags(
-        note: NoteEntity,
-        tagIds: LongArray,
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.updateNoteWithTags(note, tagIds)
-        }
-    }
-
     fun getTagsByIds(ids: LongArray?) = repository.getTagsByIds(ids)
+
 }

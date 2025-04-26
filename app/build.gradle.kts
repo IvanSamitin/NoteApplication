@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp")
     id ("kotlin-parcelize")
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -41,6 +42,11 @@ android {
 }
 
 dependencies {
+    implementation("io.insert-koin:koin-android:4.0.4")
+    implementation("io.insert-koin:koin-core:4.0.4")
+    implementation(libs.firebase.firestore)
+
+
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.14")
     val room_version = "2.6.1"
     ksp("androidx.room:room-compiler:$room_version")

@@ -20,7 +20,7 @@ class RcNoteAdapter(
 
         fun bind(note: NoteWithTags) =
             with(binding) {
-                tvDate.text = note.note.date.toString()
+                tvDate.text = note.note.date
 
                 if (note.note.header
                         .toString()
