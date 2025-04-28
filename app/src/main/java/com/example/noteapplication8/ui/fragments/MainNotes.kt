@@ -9,6 +9,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.noteapplication8.R
 import com.example.noteapplication8.databinding.FragmentMainNotesBinding
 import com.example.noteapplication8.ui.adapters.VpNoteAdapter
+import com.example.noteapplication8.ui.fragments.firebase.FirebaseMainFragment
 import com.google.android.material.tabs.TabLayoutMediator
 
 class MainNotes : Fragment() {
@@ -16,21 +17,17 @@ class MainNotes : Fragment() {
     private val binding get() = _binding!!
     private var tabLayoutMediator: TabLayoutMediator? = null
 
-    private val fList =
-        listOf(
-            NotesFragment.newInstance(),
-            TagsFragment.newInstance(),
-        )
+    private val fragmentList = listOf(
+        NotesFragment.newInstance(),
+        TagsFragment.newInstance(),
+        FirebaseMainFragment.newInstance()
+    )
 
-    private val tList =
-        listOf(
-            "Заметки",
-            "Теги",
-        )
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private val tabTitles = listOf(
+        "Заметки",
+        "Теги",
+        "Синхронизация"
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,19 +44,30 @@ class MainNotes : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        val adapter = VpNoteAdapter(this, fList)
+
+        val adapter = VpNoteAdapter(this, fragmentList)
         binding.vp.adapter = adapter
+
         val controller = findNavController()
 
         tabLayoutMediator =
             TabLayoutMediator(binding.tabLayout, binding.vp) { tab, position ->
-                tab.text = tList[position]
+                tab.text = tabTitles[position]
             }.apply { attach() }
+
+        binding.vp.registerOnPageChangeCallback(object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                // Управляем видимостью кнопки buttonCreate в зависимости от позиции
+                binding.buttonCreate.visibility = if (position == 2) View.GONE else View.VISIBLE
+            }
+        })
 
         binding.buttonCreate.setOnClickListener {
             when (binding.vp.currentItem) {
                 0 -> controller.navigate(R.id.action_mainNotes_to_noteEditFragment)
                 1 -> controller.navigate(R.id.action_mainNotes_to_tagEditFragment2)
+                2 -> binding.buttonCreate.visibility = View.INVISIBLE
             }
         }
     }

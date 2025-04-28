@@ -29,8 +29,7 @@ class TagEditFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentTagEditBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-        return root
+        return binding.root
     }
 
     override fun onViewCreated(
@@ -39,13 +38,12 @@ class TagEditFragment : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter =
-            RcNoteAdapter {
-                findNavController().navigate(
-                    R.id.action_tagEditFragment2_to_noteEditFragment,
-                    bundleOf("note" to it),
-                )
-            }
+        val adapter = RcNoteAdapter {
+            findNavController().navigate(
+                R.id.action_tagEditFragment2_to_noteEditFragment,
+                bundleOf("note" to it),
+            )
+        }
 
         val controller = findNavController()
         binding.buttonCancel.setOnClickListener {
@@ -57,11 +55,8 @@ class TagEditFragment : Fragment() {
         if (receivedTag == null) {
             saveNewTag()
         } else {
-            val id: Long
-            receivedTag.let { tag ->
-                id = tag.tagId
-                binding.tvTagText.setText(tag.text)
-            }
+            val id = receivedTag.tagId
+            binding.tvTagText.setText(receivedTag.text)
             updateCurrentTag(id)
             readNotes(id, adapter)
         }

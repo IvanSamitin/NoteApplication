@@ -18,6 +18,12 @@
         <action
             android:id="@+id/action_mainNotes_to_noteEditFragment"
             app:destination="@id/noteEditFragment" />
+        <action
+            android:id="@+id/action_mainNotes_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_mainNotes_to_registerFragment"
+            app:destination="@id/registerFragment" />
 
     </fragment>
 
@@ -35,4 +41,23 @@
         android:name="com.example.noteapplication8.ui.fragments.NoteEditFragment"
         android:label="fragment_note_edit"
         tools:layout="@layout/fragment_note_edit" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.noteapplication8.ui.fragments.firebase.loginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_forgetPasswordFragment"
+            app:destination="@id/forgetPasswordFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.noteapplication8.ui.fragments.firebase.RegisterFragment"
+        android:label="fragment_register"
+        tools:layout="@layout/fragment_register" />
+    <fragment
+        android:id="@+id/forgetPasswordFragment"
+        android:name="com.example.noteapplication8.ui.fragments.firebase.ForgetPasswordFragment"
+        android:label="fragment_forgon_password"
+        tools:layout="@layout/fragment_forgon_password" />
 </navigation>

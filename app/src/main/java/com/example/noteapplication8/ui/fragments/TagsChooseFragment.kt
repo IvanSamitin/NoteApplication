@@ -66,6 +66,7 @@ class TagsChooseFragment : BottomSheetDialogFragment() {
             }
         }
 
+
     private fun setupApplyButton(view: View) {
         view.findViewById<Button>(R.id.btnApply).setOnClickListener {
             val result = bundleOf("selectedTags" to selectedTags.toLongArray())

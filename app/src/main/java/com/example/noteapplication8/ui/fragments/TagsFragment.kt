@@ -26,8 +26,7 @@ class TagsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTagsBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-        return root
+        return binding.root
     }
 
     override fun onViewCreated(
@@ -42,17 +41,20 @@ class TagsFragment : Fragment() {
     }
 
     private fun createTagChip(tag: TagsEntity): Chip {
-        val chip = Chip(requireContext()).apply {
+        return Chip(requireContext()).apply {
             text = tag.text
             isClickable = true
             setOnClickListener {
-                findNavController().navigate(
-                    R.id.action_mainNotes_to_tagEditFragment2,
-                    bundleOf("tag" to tag),
-                )
+                navigateToTagEditFragment(tag)
             }
         }
-        return chip
+    }
+
+    private fun navigateToTagEditFragment(tag: TagsEntity) {
+        findNavController().navigate(
+            R.id.action_mainNotes_to_tagEditFragment2,
+            bundleOf("tag" to tag)
+        )
     }
 
     private fun updateChipGroup(tags: List<TagsEntity>) {

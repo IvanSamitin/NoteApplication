@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.noteapplication8.databinding.FragmentNoteEditBinding
-import com.example.noteapplication8.model.entity.NoteEntity
 import com.example.noteapplication8.model.entity.NoteWithTags
 import com.example.noteapplication8.model.entity.TagsEntity
 import com.example.noteapplication8.viewmodel.NotesViewModel
@@ -87,6 +86,7 @@ class NoteEditFragment : Fragment() {
             showMaterialDatePicker()
         }
     }
+
 
     private fun showMaterialDatePicker() {
         val picker =
