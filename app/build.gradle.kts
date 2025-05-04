@@ -45,7 +45,9 @@ dependencies {
     implementation("io.insert-koin:koin-android:4.0.4")
     implementation("io.insert-koin:koin-core:4.0.4")
     implementation(libs.firebase.firestore)
-
+    implementation(libs.firebase.auth)
+    implementation ("androidx.work:work-runtime-ktx:2.10.1")
+//    implementation ("org.koin:koin-androidx-work:4.0.4")
 
     debugImplementation ("com.squareup.leakcanary:leakcanary-android:2.14")
     val room_version = "2.6.1"

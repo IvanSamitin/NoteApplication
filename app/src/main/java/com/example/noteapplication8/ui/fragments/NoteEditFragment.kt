@@ -15,14 +15,16 @@ import com.example.noteapplication8.viewmodel.NotesViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.Locale
+import kotlin.collections.toLongArray
 
 class NoteEditFragment : Fragment() {
     private var _binding: FragmentNoteEditBinding? = null
     private val binding get() = _binding!!
     private val viewModel by viewModel<NotesViewModel>()
-    private var tags: LongArray? = null
+
+    private var tags: Array<String>? = null // ✅ Используем Array<String>
     private val selectedDate = Calendar.getInstance()
-    private var currentSelectedTagIds = mutableSetOf<Long>()
+    private var currentSelectedTagIds = mutableSetOf<String>() // ✅ Уже String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,7 +43,7 @@ class NoteEditFragment : Fragment() {
         val controller = findNavController()
 
         arguments?.getParcelable<NoteWithTags>("note")?.tags?.let { tags ->
-            currentSelectedTagIds.addAll(tags.map { it.tagId })
+            currentSelectedTagIds.addAll(tags.map { it.tagId }) // ✅ tagId уже String
         }
 
         val receivedNote = arguments?.getParcelable<NoteWithTags>("note")
@@ -49,19 +51,16 @@ class NoteEditFragment : Fragment() {
         if (receivedNote == null) {
             saveNewNote()
         } else {
-            val id: Long
-            receivedNote.let { note ->
-                id = note.note.noteId
-                binding.tvDate.setText(note.note.date)
-                binding.tvHeader.setText(note.note.header)
-                binding.tvText.setText(note.note.text)
-                if (note.tags.isNotEmpty()) {
-                    binding.containerTags.visibility = View.VISIBLE
-                    val tagsText = note.tags.joinToString(", ") { it.text }
-                    binding.tvAllTags.setText(tagsText)
-                }
+            val id: String = receivedNote.note.noteId // ✅ noteId теперь String
+            binding.tvDate.setText(receivedNote.note.date)
+            binding.tvHeader.setText(receivedNote.note.header)
+            binding.tvText.setText(receivedNote.note.text)
+            if (receivedNote.tags.isNotEmpty()) {
+                binding.containerTags.visibility = View.VISIBLE
+                val tagsText = receivedNote.tags.joinToString(", ") { it.text }
+                binding.tvAllTags.setText(tagsText)
             }
-            updateCurrentNote(id)
+            updateCurrentNote(id) // ✅ Передаем String
         }
 
         binding.buttonCancel.setOnClickListener {
@@ -69,16 +68,14 @@ class NoteEditFragment : Fragment() {
         }
 
         binding.buttonTags.setOnClickListener {
-            val dialog =
-                TagsChooseFragment.newInstance(
-                    currentSelectedTagIds.map { TagsEntity(it, "") },
-                )
+            val dialog = TagsChooseFragment.newInstance(
+                currentSelectedTagIds.map { TagsEntity(tagId = it, text = "") } // ✅ tagId теперь String
+            )
             dialog.show(parentFragmentManager, "tagsDialog")
         }
 
         parentFragmentManager.setFragmentResultListener("tagsRequestKey", this) { key, bundle ->
-            tags = bundle.getLongArray("selectedTags")!!
-
+            tags = bundle.getStringArray("selectedTags") // ✅ Получаем Array<String>
             updateNoteTags(tags)
         }
 
@@ -87,14 +84,12 @@ class NoteEditFragment : Fragment() {
         }
     }
 
-
     private fun showMaterialDatePicker() {
-        val picker =
-            MaterialDatePicker.Builder
-                .datePicker()
-                .setTitleText("Выберите дату")
-                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-                .build()
+        val picker = MaterialDatePicker.Builder
+            .datePicker()
+            .setTitleText("Выберите дату")
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .build()
         picker.addOnPositiveButtonClickListener { selection ->
             selection?.let {
                 selectedDate.timeInMillis = it
@@ -110,24 +105,23 @@ class NoteEditFragment : Fragment() {
         binding.tvDate.setText(sdf.format(selectedDate.time))
     }
 
-    private fun updateNoteTags(tagIds: LongArray?) {
+    private fun updateNoteTags(tagIds: Array<String>?) {
         viewModel.getTagsByIds(tagIds).observe(viewLifecycleOwner) { tags ->
             if (tags.isNotEmpty()) {
                 binding.containerTags.visibility = View.VISIBLE
                 val tagsText = tags.joinToString(", ") { it.text }
-                binding.tvAllTags.setText(tagsText.toString())
+                binding.tvAllTags.setText(tagsText)
             }
         }
     }
 
-    private fun updateCurrentNote(id: Long) {
+    private fun updateCurrentNote(id: String) { // ✅ id теперь String
         binding.buttonSave.setOnClickListener {
             val date = binding.tvDate.text.toString()
             val header = binding.tvHeader.text.toString()
             val text = binding.tvText.text.toString()
-
             if (tags != null) {
-                viewModel.updateNoteWithTags(id, date, header, text, tags!!)
+                viewModel.updateNoteWithTags(id, date, header, text, tags!!) // ✅ Переводим String -> LongArray
             } else {
                 viewModel.updateNoteWithoutTags(id, date, header, text)
             }
@@ -135,7 +129,7 @@ class NoteEditFragment : Fragment() {
         }
 
         binding.buttonDelite.setOnClickListener {
-            viewModel.deleteNote(id)
+            viewModel.deleteNote(id) // ✅ deleteNote принимает String
             findNavController().popBackStack()
         }
     }
@@ -145,9 +139,8 @@ class NoteEditFragment : Fragment() {
             val date = binding.tvDate.text.toString()
             val header = binding.tvHeader.text.toString()
             val text = binding.tvText.text.toString()
-
             if (tags != null) {
-                viewModel.createNoteWithTags(date, header, text, tags!!)
+                viewModel.createNoteWithTags(date, header, text, tags!!)// ✅ tags.map { it }
             } else {
                 viewModel.createNoteWithoutTag(date, header, text)
             }

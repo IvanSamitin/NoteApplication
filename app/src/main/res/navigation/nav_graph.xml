@@ -43,12 +43,15 @@
         tools:layout="@layout/fragment_note_edit" />
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.noteapplication8.ui.fragments.firebase.loginFragment"
+        android:name="com.example.noteapplication8.ui.fragments.firebase.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
             android:id="@+id/action_loginFragment_to_forgetPasswordFragment"
             app:destination="@id/forgetPasswordFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_settings"
+            app:destination="@id/settings" />
     </fragment>
     <fragment
         android:id="@+id/registerFragment"
@@ -58,6 +61,12 @@
     <fragment
         android:id="@+id/forgetPasswordFragment"
         android:name="com.example.noteapplication8.ui.fragments.firebase.ForgetPasswordFragment"
+        android:label="fragment_forgon_password"
+        tools:layout="@layout/fragment_forgon_password" />
+
+    <fragment
+        android:id="@+id/settings"
+        android:name="com.example.noteapplication8.ui.fragments.firebase.FirebaseSettingFragment"
         android:label="fragment_forgon_password"
         tools:layout="@layout/fragment_forgon_password" />
 </navigation>

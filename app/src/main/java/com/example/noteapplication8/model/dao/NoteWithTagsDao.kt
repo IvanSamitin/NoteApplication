@@ -15,7 +15,7 @@ import com.example.noteapplication8.model.entity.NoteWithTagsEntity
 interface NoteWithTagsDao {
     // Вставка заметки
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNote(note: NoteEntity): Long
+    suspend fun insertNote(note: NoteEntity)
 
     @Transaction
     @Query("SELECT * FROM notes")
@@ -29,9 +29,9 @@ interface NoteWithTagsDao {
             SELECT noteId FROM note_with_tag 
             WHERE tagId = :tagId
         )
-    """,
+    """
     )
-    fun getNotesByTagId(tagId: Long): LiveData<List<NoteWithTags>>
+    fun getNotesByTagId(tagId: String): LiveData<List<NoteWithTags>> // ✅ Используем String
 
     @Insert
     suspend fun insertNoteWithTag(noteWithTag: NoteWithTagsEntity)
@@ -40,17 +40,14 @@ interface NoteWithTagsDao {
     @Transaction
     suspend fun createNoteWithTags(
         note: NoteEntity,
-        tagIds: LongArray,
+        tagIds: Array<String>,
     ) {
-        // 1. Вставляем заметку и получаем её ID
         val noteId = insertNote(note)
-
-        // 2. Вставляем связи с тегами
         tagIds.forEach { tagId ->
             insertNoteWithTag(
                 NoteWithTagsEntity(
-                    noteId = noteId,
-                    tagId = tagId,
+                    noteId = noteId.toString(), // ✅ Long -> String
+                    tagId = tagId.toString(),   // ✅ Long -> String
                 ),
             )
         }
@@ -61,26 +58,21 @@ interface NoteWithTagsDao {
 
     // Удаление всех тегов у заметки
     @Query("DELETE FROM note_with_tag WHERE noteId = :noteId")
-    suspend fun deleteNoteTags(noteId: Long)
+    suspend fun deleteNoteTags(noteId: String) // ✅ Используем String
 
     // Полная транзакция для обновления заметки с тегами
     @Transaction
     suspend fun updateNoteWithTags(
         note: NoteEntity,
-        tagIds: LongArray,
+        tagIds: Array<String>,
     ) {
-        // 1. Обновляем саму заметку
         updateNote(note)
-
-        // 2. Удаляем все существующие связи с тегами
         deleteNoteTags(note.noteId)
-
-        // 3. Добавляем новые связи с тегами
         tagIds.forEach { tagId ->
             insertNoteWithTag(
                 NoteWithTagsEntity(
-                    noteId = note.noteId,
-                    tagId = tagId,
+                    noteId = note.noteId.toString(),
+                    tagId = tagId.toString(), // ✅ Long -> String
                 ),
             )
         }

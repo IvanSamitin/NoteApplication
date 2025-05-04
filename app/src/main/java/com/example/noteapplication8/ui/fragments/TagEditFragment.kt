@@ -51,11 +51,10 @@ class TagEditFragment : Fragment() {
         }
 
         val receivedTag = arguments?.getParcelable<TagsEntity>("tag")
-
         if (receivedTag == null) {
             saveNewTag()
         } else {
-            val id = receivedTag.tagId
+            val id = receivedTag.tagId // ✅ tagId теперь String
             binding.tvTagText.setText(receivedTag.text)
             updateCurrentTag(id)
             readNotes(id, adapter)
@@ -71,10 +70,7 @@ class TagEditFragment : Fragment() {
         }
     }
 
-    private fun readNotes(
-        id: Long,
-        adapter: RcNoteAdapter,
-    ) {
+    private fun readNotes(id: String, adapter: RcNoteAdapter) { // ✅ tagId теперь String
         viewModel.readAllNotesByTags(tagId = id).observe(viewLifecycleOwner) {
             allNotes = it
             updateUi(it, adapter)
@@ -88,18 +84,17 @@ class TagEditFragment : Fragment() {
         adapter.submitList(notes)
     }
 
-    private fun updateCurrentTag(id: Long) {
+    private fun updateCurrentTag(id: String) { // ✅ tagId теперь String
         binding.buttonSave.setOnClickListener {
             viewModel.updateTag(tagId = id, text = binding.tvTagText.text.toString())
             findNavController().popBackStack()
         }
         binding.buttonDelite.setOnClickListener {
             viewModel.deleteTag(
-                tag =
-                    TagsEntity(
-                        tagId = id,
-                        text = binding.tvTagText.text.toString(),
-                    ),
+                tag = TagsEntity(
+                    tagId = id,
+                    text = binding.tvTagText.text.toString(),
+                )
             )
             findNavController().popBackStack()
         }
