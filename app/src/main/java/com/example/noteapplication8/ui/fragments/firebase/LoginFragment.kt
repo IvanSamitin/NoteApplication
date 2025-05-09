@@ -9,15 +9,14 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import com.example.noteapplication8.R
 import com.example.noteapplication8.databinding.FragmentLoginBinding
-import com.example.noteapplication8.databinding.FragmentRegisterBinding
 import com.example.noteapplication8.utils.Constants.LOGIN
 import com.example.noteapplication8.utils.Constants.PASSWORD
 import com.example.noteapplication8.viewmodel.NotesViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlin.getValue
 
-class RegisterFragment : Fragment() {
-    private var _binding: FragmentRegisterBinding? = null
+class LoginFragment : Fragment() {
+    private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
     private val viewModel by viewModel<NotesViewModel>()
 
@@ -25,20 +24,22 @@ class RegisterFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        _binding = FragmentLoginBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.buttonRegister.setOnClickListener {
+
+        binding.buttonlogin.setOnClickListener {
             LOGIN = binding.tvLogin.text.toString()
             PASSWORD = binding.tvPassword.text.toString()
-            viewModel.register {
-                Log.d("checkData", "ti zaregan")
+            viewModel.login() {
+                Log.d("checkData", "ti voshel")
                 findNavController().popBackStack()
             }
         }
+
         binding.backGroup.setOnClickListener {
             findNavController().popBackStack()
         }

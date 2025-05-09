@@ -22,6 +22,6 @@ import androidx.room.ForeignKey
     ],
 )
 data class NoteWithTagsEntity(
-    val noteId: Long,
-    val tagId: Long,
+    val noteId: String,
+    val tagId: String,
 )

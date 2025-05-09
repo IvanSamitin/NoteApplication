@@ -16,7 +16,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class TagsChooseFragment : BottomSheetDialogFragment() {
     private val viewModel by viewModel<NotesViewModel>()
-    private val selectedTags = mutableSetOf<Long>()
+    private val selectedTags = mutableSetOf<String>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,20 +30,18 @@ class TagsChooseFragment : BottomSheetDialogFragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.readAllTags().observe(viewLifecycleOwner) { tags ->
+        viewModel.readAllTags.observe(viewLifecycleOwner) { tags ->
             updateChipGroup(tags)
         }
         setupApplyButton(view)
     }
 
     private fun updateChipGroup(tags: List<TagsEntity>) {
-        val initialSelectedIds =
-            arguments?.getLongArray(ARG_SELECTED_TAG_IDS)?.toSet() ?: emptySet()
+        val initialSelectedIds = arguments?.getStringArray(ARG_SELECTED_TAG_IDS)?.toSet()
+            ?: emptySet() // ✅ Получаем StringArray
         selectedTags.addAll(initialSelectedIds)
-
         val chipGroup = view?.findViewById<ChipGroup>(R.id.chipGroup)
         chipGroup?.removeAllViews()
-
         tags.forEach { tag ->
             val chip = createChip(tag)
             chipGroup?.addView(chip)
@@ -55,13 +53,12 @@ class TagsChooseFragment : BottomSheetDialogFragment() {
             text = tag.text
             isCheckable = true
             isCheckedIconVisible = true
-            isChecked = selectedTags.contains(tag.tagId)
-
+            isChecked = selectedTags.contains(tag.tagId) // ✅ Используем String
             setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
-                    selectedTags.add(tag.tagId)
+                    selectedTags.add(tag.tagId) // ✅ Используем String
                 } else {
-                    selectedTags.remove(tag.tagId)
+                    selectedTags.remove(tag.tagId) // ✅ Используем String
                 }
             }
         }
@@ -69,7 +66,7 @@ class TagsChooseFragment : BottomSheetDialogFragment() {
 
     private fun setupApplyButton(view: View) {
         view.findViewById<Button>(R.id.btnApply).setOnClickListener {
-            val result = bundleOf("selectedTags" to selectedTags.toLongArray())
+            val result = bundleOf("selectedTags" to selectedTags.toTypedArray())
             parentFragmentManager.setFragmentResult("tagsRequestKey", result)
             dismiss()
         }
@@ -77,16 +74,14 @@ class TagsChooseFragment : BottomSheetDialogFragment() {
 
     companion object {
         private const val ARG_SELECTED_TAG_IDS = "argSelectedTagIds"
-
         fun newInstance(selectedTags: List<TagsEntity>?): TagsChooseFragment =
             TagsChooseFragment().apply {
-                arguments =
-                    Bundle().apply {
-                        putLongArray(
-                            ARG_SELECTED_TAG_IDS,
-                            selectedTags?.map { it.tagId }?.toLongArray(),
-                        )
-                    }
+                arguments = Bundle().apply {
+                    putStringArray( // ✅ Используем StringArray
+                        ARG_SELECTED_TAG_IDS,
+                        selectedTags?.map { it.tagId }?.toTypedArray()
+                    )
+                }
             }
     }
 }

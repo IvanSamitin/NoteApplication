@@ -42,8 +42,8 @@ class NotesFragment : Fragment() {
             )
         }
 
-        viewModel.readAllNotesWithTags().observe(viewLifecycleOwner) {
-            adapter.submitList(it)
+        viewModel.readAllNotesWithTag.observe(viewLifecycleOwner) { notes ->
+            adapter.submitList(notes)
         }
 
         binding.apply {

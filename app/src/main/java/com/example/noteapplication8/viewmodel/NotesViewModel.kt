@@ -1,81 +1,211 @@
 package com.example.noteapplication8.viewmodel
 
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noteapplication8.model.entity.NoteEntity
 import com.example.noteapplication8.model.entity.TagsEntity
 import com.example.noteapplication8.model.repository.NoteRepository
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.UUID
+import javax.inject.Inject
 
-class NotesViewModel(
-    private val repository: NoteRepository
+class NotesViewModel @Inject constructor(
+    val repository: NoteRepository // ✅ Сделан public
 ) : ViewModel() {
+
+    private val firebaseAuth = FirebaseAuth.getInstance()
+    private val _authState = MutableLiveData<Boolean>()
+    val authState: LiveData<Boolean> get() = _authState
+
+    // Слушатель изменений статуса аутентификации
+    private val authStateListener = FirebaseAuth.AuthStateListener { auth ->
+        _authState.postValue(auth.currentUser != null)
+    }
+
+    init {
+        // Инициализация слушателя при создании ViewModel
+        firebaseAuth.addAuthStateListener(authStateListener)
+        // Проверка текущего статуса при старте
+        _authState.postValue(firebaseAuth.currentUser != null)
+    }
+
+    // Чтение данных
+    fun readAllNotesByTags(tagId: String) = repository.getNotesByTagId(tagId)
+    val readAllTags get() = repository.readAllTags
+    val readAllNotesWithTag get() = repository.readAllNotesWithTag
+    fun getTagsByIds(ids: Array<String>?) = repository.getTagsByIds(ids)
+
+
+    fun register(onSuccess: () -> Unit) {
+        repository.register(
+            {
+                repository.startSyncForUser()
+                onSuccess()
+            },
+            { Log.d("checkData", it) }
+        )
+    }
+
+    fun isUserAuthenticated() = repository.isUserAuthenticated()
+
+    fun signOut() {
+        viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
+                repository.clearDatabase()
+                Log.d("checkData", "Database cleared")
+
+            }
+        }
+        repository.signOut()
+    }
+
+    // Синхронизация
+    fun syncNotesFromFirebase(onSyncComplete: () -> Unit) {
+        repository.syncNotesFromFirebase(onSyncComplete)
+    }
+
+    fun syncTagsFromFirebase(onSyncComplete: () -> Unit) {
+        repository.syncTagsFromFirebase(onSyncComplete)
+    }
+
+    // Получение ID пользователя
+    fun getCurrentUserUids(): String? = repository.getCurrentUserId()
 
     fun createNoteWithoutTag(date: String, header: String, text: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val note = NoteEntity(date = date, header = header, text = text)
-            repository.createNoteWithoutTag(note = note)
+            val note = NoteEntity(
+                date = date,
+                header = header,
+                text = text,
+                isSynced = false
+            )
+            repository.createNoteWithoutTag(note)
+            repository.triggerImmediateSync()
         }
     }
 
-    fun createNoteWithTags(date: String, header: String, text: String, tagIds: LongArray) {
+    fun forceSync() {
+        repository.triggerImmediateSync()
+        Log.d("checkData", "Force sync triggered")
+    }
+
+    // Создание заметки с тегами
+    fun createNoteWithTags(date: String, header: String, text: String, tagIds: Array<String>) {
         viewModelScope.launch(Dispatchers.IO) {
-            val note = NoteEntity(date = date, header = header, text = text)
+            val note = NoteEntity(
+                noteId = UUID.randomUUID().toString(),
+                date = date,
+                header = header,
+                text = text,
+                isSynced = false
+            )
             repository.createNoteWithTags(note, tagIds)
+            repository.triggerImmediateSync()
         }
     }
 
-    fun updateNoteWithoutTags(noteId: Long, date: String, header: String, text: String) {
+    // Обновление заметки без тегов
+    fun updateNoteWithoutTags(noteId: String, date: String, header: String, text: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val note = NoteEntity(noteId = noteId, date = date, header = header, text = text)
-            repository.updateNote(note = note)
+            val note = NoteEntity(
+                noteId = noteId,
+                date = date,
+                header = header,
+                text = text,
+                isSynced = false
+            )
+            repository.updateNote(note)
+            repository.triggerImmediateSync()
         }
     }
 
+    // Обновление заметки с тегами
     fun updateNoteWithTags(
-        noteId: Long,
+        noteId: String,
         date: String,
         header: String,
         text: String,
-        tagIds: LongArray
+        tagIds: Array<String>
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val note = NoteEntity(noteId = noteId, date = date, header = header, text = text)
+            val note = NoteEntity(
+                noteId = noteId,
+                date = date,
+                header = header,
+                text = text,
+                isSynced = false
+            )
             repository.updateNoteWithTags(note, tagIds)
+            repository.triggerImmediateSync()
         }
     }
 
-    fun deleteNote(noteId: Long) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteNoteWithoutTag(noteId)
-        }
-    }
-
-    fun deleteTag(tag: TagsEntity) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.deleteTag(tag = tag)
-        }
-    }
-
+    // Создание тега
     fun createTag(text: String) {
         viewModelScope.launch {
-            repository.createTag(TagsEntity(text = text))
+            repository.createTag(TagsEntity(text = text, isSynced = false))
+            repository.triggerImmediateSync()
         }
     }
 
-    fun updateTag(tagId: Long, text: String) {
+    // Обновление тега
+    fun updateTag(tagId: String, text: String) {
         viewModelScope.launch {
-            repository.updateTag(TagsEntity(tagId, text))
+            repository.updateTag(TagsEntity(tagId, text, isSynced = false))
+            repository.triggerImmediateSync()
         }
     }
 
-    fun readAllNotesByTags(tagId: Long) = repository.getNotesByTagId(tagId)
+    // Удаление заметки
+    fun deleteNote(noteId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteNotePermanently(noteId)
+            repository.triggerImmediateSync()
+        }
+    }
 
-    fun readAllTags() = repository.readAllTags
+    // Удаление тега
+    fun deleteTag(tag: TagsEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteTagPermanently(tag.tagId)
+            repository.triggerImmediateSync()
+        }
+    }
 
-    fun readAllNotesWithTags() = repository.readAllNotesWithTag
+    // Синхронизация при входе
+    fun login(onSuccess: () -> Unit) {
+        repository.login(
+            {
+                viewModelScope.launch(Dispatchers.IO) {
+//                    repository.clearDatabase()
+//                    val userId = repository.getCurrentUserId() ?: return@launch
+//                    repository.updateOrphanedNotes(userId) // Привязка данных
+//                    repository.startSyncForUser()
+//                    repository.triggerImmediateSync() // Немедленная синхронизация
+                    syncNotesFromFirebase {
 
-    fun getTagsByIds(ids: LongArray?) = repository.getTagsByIds(ids)
+                    }
+
+                    syncTagsFromFirebase {
+
+                    }
+                }
+                onSuccess()
+            },
+            { error -> Log.e("Auth", "Ошибка: $error") }
+        )
+    }
+
+    fun getCurrentUserId(): String? {
+        return repository.getCurrentUserId()
+    }
+
+    fun getCurrentUserEmail(): String? = repository.getCurrentUserEmail()
 
 }

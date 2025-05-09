@@ -35,7 +35,7 @@ class TagsFragment : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.readAllTags().observe(viewLifecycleOwner) { tags ->
+        viewModel.readAllTags.observe(viewLifecycleOwner) { tags ->
             updateChipGroup(tags)
         }
     }
@@ -53,14 +53,13 @@ class TagsFragment : Fragment() {
     private fun navigateToTagEditFragment(tag: TagsEntity) {
         findNavController().navigate(
             R.id.action_mainNotes_to_tagEditFragment2,
-            bundleOf("tag" to tag)
+            bundleOf("tag" to tag) // ✅ tagId внутри TagsEntity уже String
         )
     }
 
     private fun updateChipGroup(tags: List<TagsEntity>) {
         val chipGroup = binding.chipGroup
-        chipGroup.removeAllViews() // Очищаем предыдущие элементы
-
+        chipGroup.removeAllViews()
         tags.forEach { tag ->
             val chip = createTagChip(tag)
             chipGroup.addView(chip)

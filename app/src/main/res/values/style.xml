@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <style name="TextInputLayoutError" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="errorTextColor">@color/error_red</item>
+        <item name="errorEnabled">true</item>
+    </style>
 </resources>
