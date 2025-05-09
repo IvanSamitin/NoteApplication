@@ -1,10 +1,12 @@
 package com.example.noteapplication8.model
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
+import com.example.noteapplication8.model.repository.NoteRepository
 import org.koin.core.component.KoinComponent
 
 class KoinWorkerFactory : WorkerFactory(), KoinComponent {
@@ -14,15 +16,16 @@ class KoinWorkerFactory : WorkerFactory(), KoinComponent {
         workerParameters: WorkerParameters
     ): ListenableWorker? {
         return try {
-            val clazz = Class.forName(workerClassName).kotlin
-            if (CoroutineWorker::class.java.isAssignableFrom(clazz.java)) {
-                val worker = clazz.objectInstance as? CoroutineWorker
-                    ?: clazz.constructors.first().call(appContext, workerParameters)
-                worker as? ListenableWorker
-            } else {
-                null
-            }
+            // Для CoroutineWorker требуется только context и params
+            val workerClass = Class.forName(workerClassName)
+                .asSubclass(CoroutineWorker::class.java)
+
+            workerClass.getDeclaredConstructor(
+                Context::class.java,
+                WorkerParameters::class.java
+            ).newInstance(appContext, workerParameters)
         } catch (e: Exception) {
+            Log.e("KoinWorkerFactory", "Error creating $workerClassName", e)
             null
         }
     }

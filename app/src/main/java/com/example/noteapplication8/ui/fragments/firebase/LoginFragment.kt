@@ -40,9 +40,8 @@ class LoginFragment : Fragment() {
             }
         }
 
-        binding.tvBack.setOnClickListener {
+        binding.backGroup.setOnClickListener {
             findNavController().popBackStack()
         }
-
     }
 }

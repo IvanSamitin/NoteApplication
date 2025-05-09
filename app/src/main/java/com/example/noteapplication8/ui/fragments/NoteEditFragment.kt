@@ -3,6 +3,7 @@ package com.example.noteapplication8.ui.fragments
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,8 +14,11 @@ import com.example.noteapplication8.model.entity.NoteWithTags
 import com.example.noteapplication8.model.entity.TagsEntity
 import com.example.noteapplication8.viewmodel.NotesViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.firebase.firestore.FirebaseFirestore
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.Date
 import java.util.Locale
+import java.util.UUID
 import kotlin.collections.toLongArray
 
 class NoteEditFragment : Fragment() {
@@ -22,9 +26,9 @@ class NoteEditFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel by viewModel<NotesViewModel>()
 
-    private var tags: Array<String>? = null // ✅ Используем Array<String>
+    private var tags: Array<String>? = null
     private val selectedDate = Calendar.getInstance()
-    private var currentSelectedTagIds = mutableSetOf<String>() // ✅ Уже String
+    private var currentSelectedTagIds = mutableSetOf<String>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,7 +47,7 @@ class NoteEditFragment : Fragment() {
         val controller = findNavController()
 
         arguments?.getParcelable<NoteWithTags>("note")?.tags?.let { tags ->
-            currentSelectedTagIds.addAll(tags.map { it.tagId }) // ✅ tagId уже String
+            currentSelectedTagIds.addAll(tags.map { it.tagId })
         }
 
         val receivedNote = arguments?.getParcelable<NoteWithTags>("note")
@@ -55,12 +59,13 @@ class NoteEditFragment : Fragment() {
             binding.tvDate.setText(receivedNote.note.date)
             binding.tvHeader.setText(receivedNote.note.header)
             binding.tvText.setText(receivedNote.note.text)
+            tags = receivedNote.tags.map { it.tagId }.toTypedArray()
             if (receivedNote.tags.isNotEmpty()) {
                 binding.containerTags.visibility = View.VISIBLE
                 val tagsText = receivedNote.tags.joinToString(", ") { it.text }
                 binding.tvAllTags.setText(tagsText)
             }
-            updateCurrentNote(id) // ✅ Передаем String
+            updateCurrentNote(id)
         }
 
         binding.buttonCancel.setOnClickListener {
@@ -69,13 +74,18 @@ class NoteEditFragment : Fragment() {
 
         binding.buttonTags.setOnClickListener {
             val dialog = TagsChooseFragment.newInstance(
-                currentSelectedTagIds.map { TagsEntity(tagId = it, text = "") } // ✅ tagId теперь String
+                currentSelectedTagIds.map {
+                    TagsEntity(
+                        tagId = it,
+                        text = ""
+                    )
+                }
             )
             dialog.show(parentFragmentManager, "tagsDialog")
         }
 
         parentFragmentManager.setFragmentResultListener("tagsRequestKey", this) { key, bundle ->
-            tags = bundle.getStringArray("selectedTags") // ✅ Получаем Array<String>
+            tags = bundle.getStringArray("selectedTags")
             updateNoteTags(tags)
         }
 
@@ -106,30 +116,56 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun updateNoteTags(tagIds: Array<String>?) {
+        tagIds?.let {
+            currentSelectedTagIds.clear()
+            currentSelectedTagIds.addAll(it.toSet())
+            tags = it
+        }
+
         viewModel.getTagsByIds(tagIds).observe(viewLifecycleOwner) { tags ->
             if (tags.isNotEmpty()) {
                 binding.containerTags.visibility = View.VISIBLE
                 val tagsText = tags.joinToString(", ") { it.text }
                 binding.tvAllTags.setText(tagsText)
+                binding.containerTags
             }
         }
     }
 
-    private fun updateCurrentNote(id: String) { // ✅ id теперь String
+    private fun updateCurrentNote(id: String) {
         binding.buttonSave.setOnClickListener {
             val date = binding.tvDate.text.toString()
             val header = binding.tvHeader.text.toString()
             val text = binding.tvText.text.toString()
-            if (tags != null) {
-                viewModel.updateNoteWithTags(id, date, header, text, tags!!) // ✅ Переводим String -> LongArray
-            } else {
-                viewModel.updateNoteWithoutTags(id, date, header, text)
+            when {
+                header.isEmpty() -> {
+                    binding.tvHeader.error = "Заголовок не может быть пустым"
+                    return@setOnClickListener
+                }
+
+                !isValidHeader(header) -> {
+                    binding.tvHeader.error = "Недопустимые символы в заголовке"
+                    return@setOnClickListener
+                }
+
+                text.isEmpty() -> {
+                    binding.tvText.error = "Текст не может быть пустым"
+                    return@setOnClickListener
+                }
+
+                else -> {
+                    if (tags != null) {
+                        viewModel.updateNoteWithTags(id, date, header, text, tags!!)
+                    } else {
+                        viewModel.updateNoteWithoutTags(id, date, header, text)
+                    }
+                    findNavController().popBackStack()
+                }
             }
-            findNavController().popBackStack()
         }
 
         binding.buttonDelite.setOnClickListener {
-            viewModel.deleteNote(id) // ✅ deleteNote принимает String
+            viewModel.deleteNote(id)
             findNavController().popBackStack()
         }
     }
@@ -139,13 +175,42 @@ class NoteEditFragment : Fragment() {
             val date = binding.tvDate.text.toString()
             val header = binding.tvHeader.text.toString()
             val text = binding.tvText.text.toString()
-            if (tags != null) {
-                viewModel.createNoteWithTags(date, header, text, tags!!)// ✅ tags.map { it }
-            } else {
-                viewModel.createNoteWithoutTag(date, header, text)
+            when {
+                header.isEmpty() -> {
+                    binding.tvHeader.error = "Заголовок не может быть пустым"
+                    return@setOnClickListener
+                }
+
+                !isValidHeader(header) -> {
+                    binding.tvHeader.error = "Недопустимые символы в заголовке"
+                    return@setOnClickListener
+                }
+
+                text.isEmpty() -> {
+                    binding.tvText.error = "Текст не может быть пустым"
+                    return@setOnClickListener
+                }
+
+                else -> {
+                    if (tags != null) {
+                        viewModel.createNoteWithTags(date, header, text, tags!!)
+                    } else {
+                        viewModel.createNoteWithoutTag(date, header, text)
+                    }
+                    findNavController().popBackStack()
+                }
             }
-            findNavController().popBackStack()
         }
+    }
+
+    private fun isValidHeader(header: String): Boolean {
+        val regex = Regex("^[a-zA-Zа-яА-Я0-9\\s.,!?()-]+\$")
+        return header.matches(regex)
+    }
+
+
+    private fun isValidText(text: String): Boolean {
+        return text.isNotBlank()
     }
 
     override fun onDestroyView() {

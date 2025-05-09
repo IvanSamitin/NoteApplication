@@ -17,6 +17,9 @@ interface NoteWithTagsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNote(note: NoteEntity)
 
+    @Query("DELETE FROM note_with_tag")
+    suspend fun deleteAllNotesTags()
+
     @Transaction
     @Query("SELECT * FROM notes")
     fun getAllNotesWithTags(): LiveData<List<NoteWithTags>>
@@ -33,8 +36,16 @@ interface NoteWithTagsDao {
     )
     fun getNotesByTagId(tagId: String): LiveData<List<NoteWithTags>> // ✅ Используем String
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNoteWithTag(noteWithTag: NoteWithTagsEntity)
+
+    @Query("DELETE FROM note_with_tag WHERE noteId = :noteId")
+    suspend fun deleteNoteTags(noteId: String)
+
+    @Transaction
+    @Query("SELECT * FROM notes WHERE noteId = :noteId")
+    suspend fun getNoteWithTagsById(noteId: String): NoteWithTags?
+
 
     // Транзакция для создания заметки с тегами
     @Transaction
@@ -42,23 +53,17 @@ interface NoteWithTagsDao {
         note: NoteEntity,
         tagIds: Array<String>,
     ) {
-        val noteId = insertNote(note)
-        tagIds.forEach { tagId ->
-            insertNoteWithTag(
-                NoteWithTagsEntity(
-                    noteId = noteId.toString(), // ✅ Long -> String
-                    tagId = tagId.toString(),   // ✅ Long -> String
-                ),
-            )
+        // 1. Сначала сохраняем заметку
+        insertNote(note)
+
+        // 2. Теперь создаем связи
+        for (tagId in tagIds) {
+            insertNoteWithTag(NoteWithTagsEntity(note.noteId, tagId))
         }
     }
 
     @Update
     suspend fun updateNote(note: NoteEntity)
-
-    // Удаление всех тегов у заметки
-    @Query("DELETE FROM note_with_tag WHERE noteId = :noteId")
-    suspend fun deleteNoteTags(noteId: String) // ✅ Используем String
 
     // Полная транзакция для обновления заметки с тегами
     @Transaction

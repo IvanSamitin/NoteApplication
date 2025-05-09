@@ -33,35 +33,41 @@ class FirebaseMainFragment : Fragment() {
         updateUi()
     }
 
-    private fun updateUi(){
-        if (viewModel.isUserAuthenticated()){
-            binding.root.removeAllViews()
-            LayoutInflater.from(context).inflate(R.layout.fragment_firebase_setting, binding.root)
-            setupSettingsActions()
-        } else{
-            binding.root.removeAllViews()
-            LayoutInflater.from(context).inflate(R.layout.fragment_guest, binding.root)
-            setupGuestActions()
+    private fun updateUi() {
+
+        viewModel.authState.observe(viewLifecycleOwner) { isAuthenticated ->
+            val fragment = if (isAuthenticated) {
+                // Показать UI для авторизованного пользователя
+                FirebaseSettingFragment()
+            } else {
+                // Показать UI для гостя
+                GuestFragment()
+            }
+            childFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit()
         }
+
+
+
     }
 
-    private fun setupSettingsActions(){
-        view?.findViewById<View>(R.id.buttonSignOut)?.setOnClickListener {
-            viewModel.signOut()
-            updateUi()
-        }
+//
+//    private fun updateUi(){
+//        if (viewModel.isUserAuthenticated()){
+//            binding.root.removeAllViews()
+//            LayoutInflater.from(context).inflate(R.layout.fragment_firebase_setting, binding.root)
+//            setupSettingsActions()
+//        } else{
+//            binding.root.removeAllViews()
+//            LayoutInflater.from(context).inflate(R.layout.fragment_guest, binding.root)
+//            setupGuestActions()
+//        }
+//    }
+//
 
-    }
+//
 
-    private fun setupGuestActions() {
-        view?.findViewById<View>(R.id.buttonSignIn)?.setOnClickListener {
-            findNavController().navigate(R.id.action_mainNotes_to_loginFragment)
-        }
-
-        view?.findViewById<View>(R.id.buttonSignUp)?.setOnClickListener {
-            findNavController().navigate(R.id.action_mainNotes_to_registerFragment)
-        }
-    }
 
     companion object {
         @JvmStatic

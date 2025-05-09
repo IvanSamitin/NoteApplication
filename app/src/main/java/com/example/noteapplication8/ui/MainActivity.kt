@@ -35,19 +35,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        // Явно указываем тип String? для userId
-        viewModel.getCurrentUserUids()?.let { userId: String ->
+        // Отслеживаем изменение статуса авторизации
+        viewModel.getCurrentUserUids()?.let { userId ->
+            // Запуск синхронизации при входе
             viewModel.repository.startSyncForUser()
 
-            // Синхронизация заметок
+            // Синхронизация заметок при входе
             viewModel.syncNotesFromFirebase {
-                // UI обновление после синхронизации
+//                viewModel.readAllNotesWithTag.observe(this, Observer {
+//
+//                })
             }
 
-            // Синхронизация тегов
             viewModel.syncTagsFromFirebase {
-                // UI обновление после синхронизации
+//                viewModel.readAllTags.observe(this, Observer {
+//
+//                })
             }
+
+
         }
     }
 }

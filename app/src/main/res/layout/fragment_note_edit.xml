@@ -99,7 +99,8 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            tools:ignore="ExtraText">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/tvText"
@@ -108,31 +109,41 @@
                 android:layout_marginBottom="8dp"
                 android:gravity="start"
                 android:hint="Текст заметки"
-                android:inputType="text" />
+                android:inputType="textMultiLine"            />
+<!--                android:scrollHorizontally="false" &lt;!&ndash; Отключить горизонтальный скролл &ndash;&gt;-->
+<!--                android:overScrollMode="never"-->
+<!--                android:singleLine="false" &lt;!&ndash; Разрешить перенос строк &ndash;&gt;-->
+<!--                android:maxLines="100" &lt;!&ndash; Максимум строк (можно увеличить) &ndash;&gt;-->
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/containerTags"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/tvAllTags"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
+                android:clickable="false"
                 android:editable="false"
-                android:hint="Теги" />
-        </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
-            android:id="@+id/buttonTags"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Выбрать теги"
-            app:cornerRadius="6dp" />
+                android:focusable="true"
+                android:hint="Теги" />
+
+            <Button
+                android:id="@+id/buttonTags"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                android:text="Выбрать теги"
+                android:visibility="visible"
+                app:cornerRadius="6dp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
     </LinearLayout>
 

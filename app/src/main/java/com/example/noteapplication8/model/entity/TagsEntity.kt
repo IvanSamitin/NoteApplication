@@ -9,8 +9,9 @@ import java.util.UUID
 @Parcelize
 @Entity(tableName = "tags")
 data class TagsEntity(
-    @PrimaryKey val tagId: String = UUID.randomUUID().toString(), // Изменено на String
+    @PrimaryKey val tagId: String = UUID.randomUUID().toString(),
     val text: String,
     val userId: String? = null,
-    val isSynced: Boolean = false
+    val isSynced: Boolean = false,
+    val isDeleted: Boolean = false // Новый флаг
 ) : Parcelable

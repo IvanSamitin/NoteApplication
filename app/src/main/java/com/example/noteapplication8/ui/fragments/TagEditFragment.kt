@@ -86,8 +86,24 @@ class TagEditFragment : Fragment() {
 
     private fun updateCurrentTag(id: String) { // ✅ tagId теперь String
         binding.buttonSave.setOnClickListener {
-            viewModel.updateTag(tagId = id, text = binding.tvTagText.text.toString())
-            findNavController().popBackStack()
+            val tagText = binding.tvTagText.text.toString().trim()
+
+            when {
+                tagText.isEmpty() -> {
+                    binding.tvTagText.error = "Название тега не может быть пустым"
+                    return@setOnClickListener
+                }
+
+                !isValidTag(tagText) -> {
+                    binding.tvTagText.error = "Недопустимые символы"
+                    return@setOnClickListener
+                }
+
+                else -> {
+                    viewModel.updateTag(tagId = id, text = tagText)
+                    findNavController().popBackStack()
+                }
+            }
         }
         binding.buttonDelite.setOnClickListener {
             viewModel.deleteTag(
@@ -102,9 +118,30 @@ class TagEditFragment : Fragment() {
 
     private fun saveNewTag() {
         binding.buttonSave.setOnClickListener {
-            viewModel.createTag(text = binding.tvTagText.text.toString())
-            findNavController().popBackStack()
+            val tagText = binding.tvTagText.text.toString().trim()
+
+            when {
+                tagText.isEmpty() -> {
+                    binding.tvTagText.error = "Название тега не может быть пустым"
+                    return@setOnClickListener
+                }
+
+                !isValidTag(tagText) -> {
+                    binding.tvTagText.error = "Недопустимые символы"
+                    return@setOnClickListener
+                }
+
+                else -> {
+                    viewModel.createTag(text = tagText)
+                    findNavController().popBackStack()
+                }
+            }
         }
+    }
+
+    private fun isValidTag(text: String): Boolean {
+        val regex = Regex("^[a-zA-Zа-яА-Я0-9\\s]+\$")
+        return text.matches(regex) && text.isNotBlank()
     }
 
     override fun onDestroyView() {

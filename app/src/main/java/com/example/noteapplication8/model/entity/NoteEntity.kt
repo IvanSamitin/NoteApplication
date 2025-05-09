@@ -9,10 +9,11 @@ import java.util.UUID
 @Parcelize
 @Entity(tableName = "notes")
 data class NoteEntity(
-    @PrimaryKey val noteId: String = UUID.randomUUID().toString(), // Изменено на String
+    @PrimaryKey val noteId: String = UUID.randomUUID().toString(),
     val userId: String? = null,
     val date: String,
     val header: String,
     val text: String,
-    val isSynced: Boolean = false
+    val isSynced: Boolean = false,
+    val isDeleted: Boolean = false // Новый флаг
 ) : Parcelable

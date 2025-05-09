@@ -1,5 +1,6 @@
 package com.example.noteapplication8.model.datasource
 
+import android.util.Log
 import com.example.noteapplication8.model.entity.FirebaseNote
 import com.example.noteapplication8.model.entity.FirebaseTag
 import com.example.noteapplication8.model.entity.NoteEntity
@@ -25,8 +26,9 @@ class FirebaseService {
         )
         try {
             notesRef.document(note.noteId).set(firebaseNote).await()
+            Log.d("FirebaseService", "Note uploaded: ${note.noteId}")
         } catch (e: Exception) {
-            // Обработка ошибок
+            Log.e("FirebaseService", "Failed to upload note: ${note.noteId}", e)
         }
     }
 
@@ -44,12 +46,20 @@ class FirebaseService {
         }
     }
 
-    // Слушатель для синхронизации заметок в реальном времени
     fun observeNotes(userId: String, onNotesReceived: (List<FirebaseNote>) -> Unit) {
         notesRef.whereEqualTo("userId", userId)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) return@addSnapshotListener
+                if (error != null) {
+                    Log.e("Firebase", "Ошибка получения заметок: $error")
+                    return@addSnapshotListener
+                }
+
                 val notes = snapshot?.toObjects(FirebaseNote::class.java) ?: emptyList()
+                Log.d("Firebase", "Получено ${notes.size} заметок из Firebase")
+                for (note in notes) {
+                    Log.d("Firebase", "Заметка ${note.noteId} содержит теги: ${note.tagIds}")
+                }
+
                 onNotesReceived(notes)
             }
     }
@@ -62,5 +72,22 @@ class FirebaseService {
                 val tags = snapshot?.toObjects(FirebaseTag::class.java) ?: emptyList()
                 onTagsReceived(tags)
             }
+    }
+
+    suspend fun deleteNote(noteId: String) {
+        try {
+            notesRef.document(noteId).delete().await()
+            Log.d("FirebaseService", "Note deleted: $noteId")
+        } catch (e: Exception) {
+            Log.e("FirebaseService", "Failed to delete note: $noteId", e)
+        }
+    }
+
+    suspend fun deleteTag(tagId: String) {
+        try {
+            tagsRef.document(tagId).delete().await()
+        } catch (e: Exception) {
+            // Обработка ошибок
+        }
     }
 }

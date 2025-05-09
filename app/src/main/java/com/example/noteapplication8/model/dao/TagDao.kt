@@ -18,8 +18,21 @@ interface TagDao {
     @Delete
     suspend fun deleteTag(tag: TagsEntity)
 
+    // Методы для работы с удалениями
+    @Query("UPDATE tags SET isDeleted = 1 WHERE tagId = :tagId")
+    suspend fun markTagAsDeleted(tagId: String)
+
+    @Query("SELECT * FROM tags WHERE isDeleted = 1 AND userId = :userId")
+    suspend fun getDeletedTags(userId: String): List<TagsEntity>
+
+    @Query("DELETE FROM tags WHERE tagId = :tagId")
+    suspend fun deleteTagPermanently(tagId: String)
+
     @Update
     suspend fun updateTag(tag: TagsEntity)
+
+    @Query("DELETE FROM tags")
+    suspend fun deleteAllTags()
 
     @Query("SELECT * FROM tags")
     fun getAllTags(): LiveData<List<TagsEntity>>

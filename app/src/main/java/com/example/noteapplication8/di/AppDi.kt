@@ -1,6 +1,9 @@
 package com.example.noteapplication8.di
 
+import android.content.Context
 import androidx.room.Room
+import androidx.work.WorkerParameters
+import com.example.noteapplication8.model.SyncWorker
 import com.example.noteapplication8.model.datasource.FirebaseService
 import com.example.noteapplication8.model.datasource.NoteDatabase
 import com.example.noteapplication8.model.repository.NoteRepository
@@ -20,6 +23,7 @@ val appModule = module {
     single {
         FirebaseService()
     }
+
 
     viewModel {
         NotesViewModel(
